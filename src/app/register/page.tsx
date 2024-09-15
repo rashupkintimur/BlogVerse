@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import Loading from "../components/Loading";
+import Loading from "../components/Loading/Loading";
 
 interface IFormData {
   name: string;

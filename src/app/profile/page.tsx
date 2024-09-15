@@ -1,33 +1,44 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Loading from "../components/Loading";
+import Loading from "../components/Loading/Loading";
+import { useForm } from "react-hook-form";
+import CreatePostForm from "../components/CreatePostForm/CreatePostForm";
+import EditProfileForm from "../components/EditProfileForm/EditProfileForm";
 
 interface IPost {
-  id: number;
+  _id: number;
   title: string;
   description: string;
   createdAt: string;
 }
 
-interface IUserProfile {
+export interface IUserProfile {
   name: string;
   email: string;
 }
 
-export default function Dashboard() {
+export interface IPostForm {
+  title: string;
+  description: string;
+}
+
+export default function Profile() {
   const [posts, setPosts] = useState<IPost[]>([]);
   const [userProfile, setUserProfile] = useState<IUserProfile | null>(null);
   const [isPostsLoading, setIsPostsLoading] = useState(true);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
-  const [newPostTitle, setNewPostTitle] = useState("");
-  const [newPostDescription, setNewPostDescription] = useState("");
-  const [editName, setEditName] = useState(userProfile?.name || "");
-  const [editEmail, setEditEmail] = useState(userProfile?.email || "");
-
-  const router = useRouter();
+  const {
+    register: registerPost,
+    handleSubmit: submitPost,
+    formState: { errors: postErrors },
+  } = useForm<IPostForm>();
+  const {
+    register: registerProfile,
+    handleSubmit: submitProfile,
+    formState: { errors: profileErrors },
+  } = useForm<IUserProfile>();
 
   useEffect(() => {
     (async () => {
@@ -53,8 +64,10 @@ export default function Dashboard() {
     })();
   }, []);
 
-  const handleCreatePost = async () => {
+  // обработчик создания поста
+  const handleCreatePost = async (data: IPostForm) => {
     const token = localStorage.getItem("token");
+
     const res = await fetch("/api/posts", {
       method: "POST",
       headers: {
@@ -62,22 +75,23 @@ export default function Dashboard() {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        title: newPostTitle,
-        description: newPostDescription,
+        title: data.title,
+        description: data.description,
       }),
     });
 
     if (res.ok) {
       const newPost = await res.json();
       setPosts([newPost, ...posts]);
-      setNewPostTitle("");
-      setNewPostDescription("");
       setShowCreatePost(false);
     }
   };
 
-  const handleUpdateProfile = async () => {
+  // обработчик изменения данных пользователя
+  const handleUpdateProfile = async (data: IUserProfile) => {
     const token = localStorage.getItem("token");
+
+    setUserProfile(null);
     const res = await fetch("/api/user", {
       method: "PUT",
       headers: {
@@ -85,8 +99,8 @@ export default function Dashboard() {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        name: editName,
-        email: editEmail,
+        name: data.name,
+        email: data.email,
       }),
     });
 
@@ -94,6 +108,7 @@ export default function Dashboard() {
       const updatedUser = await res.json();
       setUserProfile(updatedUser);
       setShowEditProfile(false);
+      setUserProfile(updatedUser);
     }
   };
 
@@ -116,26 +131,12 @@ export default function Dashboard() {
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               New Post
             </h2>
-            <input
-              type="text"
-              value={newPostTitle}
-              onChange={(e) => setNewPostTitle(e.target.value)}
-              placeholder="Title"
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm mb-4"
+            <CreatePostForm
+              handle={handleCreatePost}
+              submitForm={submitPost}
+              register={registerPost}
+              errors={postErrors}
             />
-            <textarea
-              value={newPostDescription}
-              onChange={(e) => setNewPostDescription(e.target.value)}
-              placeholder="Description"
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm mb-4"
-              rows={4}
-            />
-            <button
-              onClick={handleCreatePost}
-              className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-sm hover:bg-indigo-700"
-            >
-              Create Post
-            </button>
           </div>
         )}
 
@@ -143,10 +144,10 @@ export default function Dashboard() {
           {isPostsLoading ? (
             <Loading />
           ) : (
-            <div>
+            <div className="grid gap-5">
               {posts.map((post) => (
                 <div
-                  key={post.id}
+                  key={post._id}
                   className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
                 >
                   <h2 className="text-xl font-semibold text-gray-900">
@@ -185,32 +186,13 @@ export default function Dashboard() {
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   Edit Profile
                 </h2>
-                <input
-                  type="text"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  placeholder="Name"
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm mb-4"
+                <EditProfileForm
+                  handle={handleUpdateProfile}
+                  submitForm={submitProfile}
+                  register={registerProfile}
+                  errors={profileErrors}
+                  setShowEditProfile={setShowEditProfile}
                 />
-                <input
-                  type="email"
-                  value={editEmail}
-                  onChange={(e) => setEditEmail(e.target.value)}
-                  placeholder="Email"
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm mb-4"
-                />
-                <button
-                  onClick={handleUpdateProfile}
-                  className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-sm hover:bg-indigo-700"
-                >
-                  Save Changes
-                </button>
-                <button
-                  onClick={() => setShowEditProfile(false)}
-                  className="ml-4 px-4 py-2 bg-gray-300 text-gray-800 font-semibold rounded-lg shadow-sm hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
               </div>
             )}
           </div>
