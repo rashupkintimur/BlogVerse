@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import Loading from "../components/Loading";
 
 interface IFormData {
   name: string;
@@ -19,6 +20,7 @@ export default function Register() {
   } = useForm<IFormData>();
   const router = useRouter();
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (data: IFormData) => {
     if (data.password !== data.confirmPassword) {
@@ -26,12 +28,17 @@ export default function Register() {
       return;
     }
 
+    setIsLoading(true);
     const res = await fetch("/api/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email: data.email, password: data.password }),
+      body: JSON.stringify({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      }),
     });
 
     const result = await res.json();
@@ -40,6 +47,7 @@ export default function Register() {
       localStorage.setItem("token", result.token);
       router.push("/dashboard");
     } else {
+      setIsLoading(false);
       setResponseMessage(result.message);
     }
   };
@@ -139,6 +147,7 @@ export default function Register() {
             />
           </div>
           {<p className="text-red-500">{responseMessage}</p>}
+          {isLoading ? <Loading /> : null}
           <button
             type="submit"
             className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"

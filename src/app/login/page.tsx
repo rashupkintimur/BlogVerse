@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import Loading from "../components/Loading";
 
 interface IFormData {
   email: string;
@@ -17,8 +18,10 @@ export default function Login() {
   } = useForm<IFormData>();
   const router = useRouter();
   const [responseMessage, setResponseMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (data: IFormData) => {
+    setIsLoading(true);
     const res = await fetch("/api/login", {
       method: "POST",
       headers: {
@@ -33,6 +36,7 @@ export default function Login() {
       localStorage.setItem("token", result.token);
       router.push("/dashboard");
     } else {
+      setIsLoading(false);
       setResponseMessage(result.message);
     }
   };
@@ -93,6 +97,7 @@ export default function Login() {
             )}
           </div>
           {<p className="text-red-500">{responseMessage}</p>}
+          {isLoading ? <Loading /> : null}
           <button
             type="submit"
             className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
