@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { verifyToken } from "../../../lib/auth";
-import { db } from "../../../lib/mongodb";
 import { ObjectId } from "mongodb";
+import { verifyToken } from "@/lib/auth";
+import { db } from "@/lib/mongodb";
 
 export async function PUT(request: Request) {
   try {

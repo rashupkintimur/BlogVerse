@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { db } from "../../../lib/mongodb";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { db } from "@/lib/mongodb";
 
 export async function POST(request: Request) {
   try {

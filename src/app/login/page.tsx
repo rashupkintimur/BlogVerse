@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Loading from "../components/Loading/Loading";
+import Link from "next/link";
 
 interface IFormData {
   email: string;
@@ -98,6 +99,9 @@ export default function Login() {
           </div>
           {<p className="text-red-500">{responseMessage}</p>}
           {isLoading ? <Loading /> : null}
+          <Link href="/register" className="pt-5 text-blue-700">
+            Don't have an account?
+          </Link>
           <button
             type="submit"
             className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
