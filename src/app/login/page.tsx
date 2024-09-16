@@ -32,6 +32,7 @@ export default function Login() {
     });
 
     const result = await res.json();
+
     if (res.ok) {
       // Сохранение токена в localStorage
       localStorage.setItem("token", result.token);

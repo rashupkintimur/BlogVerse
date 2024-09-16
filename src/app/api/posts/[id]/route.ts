@@ -2,6 +2,27 @@ import { ObjectId } from "mongodb";
 import { db } from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params;
+
+  try {
+    // Удалить пост по id
+    await db.collection("posts").deleteOne({ _id: new ObjectId(id) });
+
+    return NextResponse.json({
+      message: "Post deleted successfully",
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }

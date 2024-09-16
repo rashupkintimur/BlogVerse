@@ -16,22 +16,23 @@ export default function Posts() {
     (async () => {
       const token = localStorage.getItem("token");
 
-      if (!token) {
-        router.push("/login");
-        return;
-      }
-
       //  получение новых постов
-      const postsRes = await fetch("/api/posts", {
+      const res = await fetch("/api/posts", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (postsRes.ok) {
-        const postsData = await (await postsRes.json()).posts;
+      // проверка действительности токена
+      if (res.status === 401) {
+        router.push("/login");
+        return;
+      }
 
-        setPosts(postsData);
+      if (res.ok) {
+        const resData = await res.json();
+
+        setPosts(resData.posts);
         setIsLoadingPosts(false);
       }
     })();

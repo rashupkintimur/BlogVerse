@@ -21,22 +21,23 @@ const Post: React.FC<IPage> = ({ params }) => {
     (async () => {
       const token = localStorage.getItem("token");
 
-      if (!token) {
-        router.push("/login");
-        return;
-      }
-
       //  получение поста
-      const postRes = await fetch(`/api/posts/${params.id}`, {
+      const res = await fetch(`/api/posts/${params.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (postRes.ok) {
-        const postData = await postRes.json();
+      // проверка действительности токена
+      if (res.status === 401) {
+        router.push("/login");
+        return;
+      }
 
-        setPost(postData);
+      if (res.ok) {
+        const resData = await res.json();
+
+        setPost(resData);
         setIsLoadingPost(false);
       }
     })();

@@ -53,11 +53,6 @@ export default function Profile() {
     (async () => {
       const token = localStorage.getItem("token");
 
-      if (!token) {
-        router.push("/login");
-        return;
-      }
-
       setIsCheckToken(false);
 
       // Загрузка данных постов
@@ -73,6 +68,12 @@ export default function Profile() {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      // проверка действительности токена
+      if (userRes.status === 401) {
+        router.push("/login");
+        return;
+      }
 
       if (userRes.ok && postsRes.ok) {
         const userData = await userRes.json();
@@ -102,9 +103,16 @@ export default function Profile() {
       }),
     });
 
+    // проверка действительности токена
+    if (res.status === 401) {
+      router.push("/login");
+      return;
+    }
+
     if (res.ok) {
-      const newPost = await res.json();
-      setPosts([newPost, ...posts]);
+      const resData = await res.json();
+
+      setPosts([resData, ...posts]);
       setShowCreatePost(false);
       postReset();
     }
@@ -115,6 +123,7 @@ export default function Profile() {
     const token = localStorage.getItem("token");
 
     setUserProfile(null);
+
     const res = await fetch("/api/user", {
       method: "PUT",
       headers: {
@@ -127,13 +136,41 @@ export default function Profile() {
       }),
     });
 
-    if (res.ok) {
-      const updatedUser = await res.json();
+    // проверка действительности токена
+    if (res.status === 401) {
+      router.push("/login");
+      return;
+    }
 
-      setUserProfile(updatedUser);
+    if (res.ok) {
+      const resData = await res.json();
+
+      setUserProfile(resData);
       setShowEditProfile(false);
-      setUserProfile(updatedUser);
       profileReset();
+    }
+  };
+
+  // обработчик удаления поста
+  const handleDeletePost = async (id: string) => {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`/api/posts/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // проверка действительности токена
+    if (res.status === 401) {
+      router.push("/login");
+      return;
+    }
+
+    if (res.ok) {
+      setPosts(posts.filter((post) => String(post._id) !== id));
     }
   };
 
@@ -174,7 +211,7 @@ export default function Profile() {
               {isPostsLoading ? (
                 <Loading />
               ) : posts.length ? (
-                <PostsList posts={posts} />
+                <PostsList posts={posts} handleDelete={handleDeletePost} />
               ) : (
                 <h3 className="text-center text-5xl pt-5 font-bold">
                   The list is empty
