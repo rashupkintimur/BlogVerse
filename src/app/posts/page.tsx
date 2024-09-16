@@ -7,7 +7,7 @@ import { IPost } from "../profile/page";
 import Loading from "../components/Loading/Loading";
 import Link from "next/link";
 
-export default function Dashboard() {
+export default function Posts() {
   const [posts, setPosts] = useState<IPost[]>([]);
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const router = useRouter();

@@ -51,10 +51,7 @@ const Post: React.FC<IPage> = ({ params }) => {
       ) : (
         <div>
           <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-8">
-            <Link
-              href="/dashboard"
-              className="text-xl mb-5 block text-blue-700"
-            >
+            <Link href="/posts" className="text-xl mb-5 block text-blue-700">
               To the main page
             </Link>
             <header className="border-b pb-4 mb-6">

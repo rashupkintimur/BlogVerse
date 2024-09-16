@@ -143,10 +143,7 @@ export default function Profile() {
         <div className="flex min-h-screen bg-gray-100">
           {/* Секция постов */}
           <div className="w-2/3 p-8">
-            <Link
-              href="/dashboard"
-              className="text-xl mb-5 block text-blue-700"
-            >
+            <Link href="/posts" className="text-xl mb-5 block text-blue-700">
               To the main page
             </Link>
             <div className="flex justify-between items-center mb-6">
