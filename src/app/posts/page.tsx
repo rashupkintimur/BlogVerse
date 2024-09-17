@@ -62,7 +62,15 @@ export default function Posts() {
                 </svg>
               </Link>
             </div>
-            {isLoadingPosts ? <Loading /> : <PostsList posts={posts} />}
+            {isLoadingPosts ? (
+              <Loading />
+            ) : posts.length ? (
+              <PostsList posts={posts} />
+            ) : (
+              <h3 className="text-center text-5xl pt-5 font-bold">
+                The list is empty
+              </h3>
+            )}
           </div>
         </div>
       )}

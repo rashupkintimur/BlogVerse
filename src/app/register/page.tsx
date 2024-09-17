@@ -46,7 +46,7 @@ export default function Register() {
     if (res.ok) {
       // Сохранение токена в localStorage
       localStorage.setItem("token", result.token);
-      router.push("/dashboard");
+      router.push("/posts");
     } else {
       setIsLoading(false);
       setResponseMessage(result.message);
