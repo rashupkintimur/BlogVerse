@@ -11,7 +11,10 @@ const PostsList: React.FC<IPostsList> = ({ posts, handleDelete }) => {
   return (
     <ul className="grid gap-5">
       {posts.map((post) => (
-        <li className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow flex justify-between items-start">
+        <li
+          key={post._id}
+          className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow flex justify-between items-start"
+        >
           <Link
             key={post._id}
             href={`/posts/${post._id}`}

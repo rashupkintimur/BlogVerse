@@ -101,7 +101,7 @@ export default function Login() {
           {<p className="text-red-500">{responseMessage}</p>}
           {isLoading ? <Loading /> : null}
           <Link href="/register" className="pt-5 text-blue-700">
-            Don't have an account?
+            Don&apos;t have an account?
           </Link>
           <button
             type="submit"

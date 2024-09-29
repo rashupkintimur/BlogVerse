@@ -41,7 +41,7 @@ const Post: React.FC<IPage> = ({ params }) => {
         setIsLoadingPost(false);
       }
     })();
-  }, []);
+  }, [router, params.id]);
 
   return (
     <div>

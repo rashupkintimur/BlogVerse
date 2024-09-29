@@ -41,6 +41,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ token });
     }
   } catch (err) {
+    console.log(err);
     return NextResponse.json(
       { message: "Registration failed" },
       { status: 500 }

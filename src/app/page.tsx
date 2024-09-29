@@ -14,5 +14,5 @@ export default function Page() {
     } else {
       router.push("/posts");
     }
-  }, []);
+  }, [router]);
 }

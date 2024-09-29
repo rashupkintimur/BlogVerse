@@ -36,7 +36,7 @@ export default function Posts() {
         setIsLoadingPosts(false);
       }
     })();
-  }, []);
+  }, [router]);
 
   return (
     <div>

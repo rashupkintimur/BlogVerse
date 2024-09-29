@@ -84,7 +84,7 @@ export default function Profile() {
         setIsPostsLoading(false);
       }
     })();
-  }, []);
+  }, [router]);
 
   // обработчик создания поста
   const handleCreatePost = async (data: IPostForm) => {
