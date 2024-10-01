@@ -29,7 +29,6 @@ export interface IPostForm {
 }
 
 export default function Profile() {
-  const [isCheckToken, setIsCheckToken] = useState(true);
   const [posts, setPosts] = useState<IPost[]>([]);
   const [userProfile, setUserProfile] = useState<IUserProfile | null>(null);
   const [isPostsLoading, setIsPostsLoading] = useState(true);
@@ -52,8 +51,6 @@ export default function Profile() {
   useEffect(() => {
     (async () => {
       const token = localStorage.getItem("token");
-
-      setIsCheckToken(false);
 
       // Загрузка данных постов
       const postsRes = await fetch("/api/myposts", {
@@ -176,88 +173,86 @@ export default function Profile() {
 
   return (
     <div>
-      {isCheckToken ? null : (
-        <div className="flex min-h-screen bg-gray-100">
-          {/* Секция постов */}
-          <div className="w-2/3 p-8">
-            <Link href="/posts" className="text-xl mb-5 block text-blue-700">
-              To the main page
-            </Link>
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold text-gray-900">Your Posts</h1>
-              <button
-                onClick={() => setShowCreatePost(!showCreatePost)}
-                className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-sm hover:bg-indigo-700"
-              >
-                {showCreatePost ? "Cancel" : "Create New Post"}
-              </button>
-            </div>
-
-            {showCreatePost && (
-              <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  New Post
-                </h2>
-                <CreatePostForm
-                  handle={handleCreatePost}
-                  submitForm={submitPost}
-                  register={registerPost}
-                  errors={postErrors}
-                />
-              </div>
-            )}
-
-            <div className="space-y-6">
-              {isPostsLoading ? (
-                <Loading />
-              ) : posts.length ? (
-                <PostsList posts={posts} handleDelete={handleDeletePost} />
-              ) : (
-                <h3 className="text-center text-5xl pt-5 font-bold">
-                  The list is empty
-                </h3>
-              )}
-            </div>
+      <div className="flex min-h-screen bg-gray-100">
+        {/* Секция постов */}
+        <div className="w-2/3 p-8">
+          <Link href="/posts" className="text-xl mb-5 block text-blue-700">
+            To the main page
+          </Link>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold text-gray-900">Your Posts</h1>
+            <button
+              onClick={() => setShowCreatePost(!showCreatePost)}
+              className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-sm hover:bg-indigo-700"
+            >
+              {showCreatePost ? "Cancel" : "Create New Post"}
+            </button>
           </div>
 
-          {/* Секция профиля */}
-          <div className="w-1/3 p-8 bg-white shadow-lg">
-            {userProfile ? (
-              <div>
-                {!showEditProfile ? (
-                  <div className="flex flex-col items-center space-y-4">
-                    <h2 className="text-2xl font-semibold text-gray-900">
-                      {userProfile.name}
-                    </h2>
-                    <p className="text-gray-600">{userProfile.email}</p>
-                    <button
-                      onClick={() => setShowEditProfile(true)}
-                      className="mt-6 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-sm hover:bg-indigo-700"
-                    >
-                      Edit Profile
-                    </button>
-                  </div>
-                ) : (
-                  <div className="p-4 bg-white rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                      Edit Profile
-                    </h2>
-                    <EditProfileForm
-                      handle={handleUpdateProfile}
-                      submitForm={submitProfile}
-                      register={registerProfile}
-                      errors={profileErrors}
-                      setShowEditProfile={setShowEditProfile}
-                    />
-                  </div>
-                )}
-              </div>
-            ) : (
+          {showCreatePost && (
+            <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                New Post
+              </h2>
+              <CreatePostForm
+                handle={handleCreatePost}
+                submitForm={submitPost}
+                register={registerPost}
+                errors={postErrors}
+              />
+            </div>
+          )}
+
+          <div className="space-y-6">
+            {isPostsLoading ? (
               <Loading />
+            ) : posts.length ? (
+              <PostsList posts={posts} handleDelete={handleDeletePost} />
+            ) : (
+              <h3 className="text-center text-5xl pt-5 font-bold">
+                The list is empty
+              </h3>
             )}
           </div>
         </div>
-      )}
+
+        {/* Секция профиля */}
+        <div className="w-1/3 p-8 bg-white shadow-lg">
+          {userProfile ? (
+            <div>
+              {!showEditProfile ? (
+                <div className="flex flex-col items-center space-y-4">
+                  <h2 className="text-2xl font-semibold text-gray-900">
+                    {userProfile.name}
+                  </h2>
+                  <p className="text-gray-600">{userProfile.email}</p>
+                  <button
+                    onClick={() => setShowEditProfile(true)}
+                    className="mt-6 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-sm hover:bg-indigo-700"
+                  >
+                    Edit Profile
+                  </button>
+                </div>
+              ) : (
+                <div className="p-4 bg-white rounded-lg shadow-md">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                    Edit Profile
+                  </h2>
+                  <EditProfileForm
+                    handle={handleUpdateProfile}
+                    submitForm={submitProfile}
+                    register={registerProfile}
+                    errors={profileErrors}
+                    setShowEditProfile={setShowEditProfile}
+                  />
+                </div>
+              )}
+            </div>
+          ) : (
+            <Loading />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

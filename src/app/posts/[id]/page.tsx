@@ -1,10 +1,12 @@
 "use client";
 
+import CommentsList from "@/app/components/CommentsList/CommentsList";
 import Loading from "@/app/components/Loading/Loading";
 import { IPost } from "@/app/profile/page";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
 interface IPage {
   params: {
@@ -12,36 +14,108 @@ interface IPage {
   };
 }
 
+export interface IComment {
+  _id: string;
+  user_id: string;
+  post_id: string;
+  text: string;
+}
+
+export interface IUser {
+  _id: string;
+  name: string;
+}
+
 const Post: React.FC<IPage> = ({ params }) => {
   const router = useRouter();
   const [isLoadingPost, setIsLoadingPost] = useState(true);
   const [post, setPost] = useState<IPost | null>(null);
+  const [comments, setComments] = useState<IComment[]>([]);
+  const [users, setUsers] = useState<IUser[]>([]);
+  const [currentUser, setCurrentUser] = useState<IUser | null>(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IComment>();
 
   useEffect(() => {
     (async () => {
       const token = localStorage.getItem("token");
 
       //  получение поста
-      const res = await fetch(`/api/posts/${params.id}`, {
+      const resPosts = await fetch(`/api/posts/${params.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      //  получение поста
+      const resComments = await fetch(`/api/posts/${params.id}/comments`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // получение текущего пользователя
+      const resUser = await fetch("/api/user", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
       // проверка действительности токена
-      if (res.status === 401) {
+      if (resPosts.status === 401) {
         router.push("/login");
         return;
       }
 
-      if (res.ok) {
-        const resData = await res.json();
+      if (resPosts.ok) {
+        const resPostsData = await resPosts.json();
+        const resCommentsData = await resComments.json();
+        const resUserData = await resUser.json();
 
-        setPost(resData);
+        setPost(resPostsData);
+        setComments(resCommentsData.comments);
+        setUsers(resCommentsData.users);
+        setCurrentUser(resUserData);
         setIsLoadingPost(false);
       }
     })();
   }, [router, params.id]);
+
+  // создание комминтария
+  const createComment = async (data: IComment) => {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`/api/posts/${params.id}/comments`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (res.ok) {
+      router.push("/create-comment/success");
+    }
+  };
+
+  // удаление комментария
+  const deleteComment = async (commentId: string) => {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`/api/posts/${params.id}/comments/${commentId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.ok) {
+      router.push("/delete-comment/success");
+    }
+  };
 
   return (
     <div>
@@ -69,6 +143,47 @@ const Post: React.FC<IPage> = ({ params }) => {
             <footer className="mt-8 text-sm text-gray-500">
               <p>Post ID: {params.id}</p>
             </footer>
+          </div>
+          <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-8">
+            <h3 className="text-4xl mb-5">Comments</h3>
+            <CommentsList
+              comments={comments}
+              users={users}
+              currentUser={currentUser}
+              deleteComment={deleteComment}
+            />
+            <form
+              method="POST"
+              onSubmit={handleSubmit(createComment)}
+              className="flex flex-col"
+            >
+              <div className="mb-4">
+                <label
+                  htmlFor="comment"
+                  className="block text-sm font-medium text-gray-700 cursor-pointer"
+                >
+                  Your Comment
+                </label>
+                <textarea
+                  id="comment"
+                  required
+                  className="resize-none h-32 mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg"
+                  {...register("text", {
+                    minLength: {
+                      value: 1,
+                      message: "Comment must be at least 1 characters",
+                    },
+                    required: "Comment is required",
+                  })}
+                />
+                {errors.text && (
+                  <p className="text-red-500">{errors.text.message}</p>
+                )}
+              </div>
+              <button className="bg-indigo-500 text-white px-3 py-2 rounded">
+                Post Comment
+              </button>
+            </form>
           </div>
         </div>
       )}

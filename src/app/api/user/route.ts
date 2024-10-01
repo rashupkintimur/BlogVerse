@@ -77,7 +77,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({
-      id: user._id,
+      _id: user._id,
       name: user.name,
       email: user.email,
     });
