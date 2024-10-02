@@ -23,7 +23,7 @@ export default function Register() {
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit = async (data: IFormData) => {
+  const handlerRegister = async (data: IFormData) => {
     if (data.password !== data.confirmPassword) {
       setResponseMessage("Passwords do not match!");
       return;
@@ -43,9 +43,8 @@ export default function Register() {
     });
 
     const result = await res.json();
+
     if (res.ok) {
-      // Сохранение токена в localStorage
-      localStorage.setItem("token", result.token);
       router.push("/posts");
     } else {
       setIsLoading(false);
@@ -59,7 +58,7 @@ export default function Register() {
         <h1 className="text-2xl font-bold text-center text-gray-900">
           Create an Account
         </h1>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(handlerRegister)} className="space-y-4">
           <div>
             <label
               htmlFor="name"

@@ -14,20 +14,8 @@ export default function Posts() {
 
   useEffect(() => {
     (async () => {
-      const token = localStorage.getItem("token");
-
       //  получение новых постов
-      const res = await fetch("/api/posts", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      // проверка действительности токена
-      if (res.status === 401) {
-        router.push("/login");
-        return;
-      }
+      const res = await fetch("/api/posts");
 
       if (res.ok) {
         const resData = await res.json();

@@ -16,8 +16,8 @@ interface IPage {
 
 export interface IComment {
   _id: string;
-  user_id: string;
-  post_id: string;
+  userId: string;
+  postId: string;
   text: string;
 }
 
@@ -41,34 +41,14 @@ const Post: React.FC<IPage> = ({ params }) => {
 
   useEffect(() => {
     (async () => {
-      const token = localStorage.getItem("token");
+      //  получение поста
+      const resPosts = await fetch(`/api/posts/${params.id}`);
 
       //  получение поста
-      const resPosts = await fetch(`/api/posts/${params.id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      //  получение поста
-      const resComments = await fetch(`/api/posts/${params.id}/comments`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const resComments = await fetch(`/api/posts/${params.id}/comments`);
 
       // получение текущего пользователя
-      const resUser = await fetch("/api/user", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      // проверка действительности токена
-      if (resPosts.status === 401) {
-        router.push("/login");
-        return;
-      }
+      const resUser = await fetch("/api/user");
 
       if (resPosts.ok) {
         const resPostsData = await resPosts.json();
@@ -85,14 +65,9 @@ const Post: React.FC<IPage> = ({ params }) => {
   }, [router, params.id]);
 
   // создание комминтария
-  const createComment = async (data: IComment) => {
-    const token = localStorage.getItem("token");
-
+  const handleCreateComment = async (data: IComment) => {
     const res = await fetch(`/api/posts/${params.id}/comments`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       body: JSON.stringify(data),
     });
 
@@ -102,14 +77,9 @@ const Post: React.FC<IPage> = ({ params }) => {
   };
 
   // удаление комментария
-  const deleteComment = async (commentId: string) => {
-    const token = localStorage.getItem("token");
-
+  const handleDeleteComment = async (commentId: string) => {
     const res = await fetch(`/api/posts/${params.id}/comments/${commentId}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     });
 
     if (res.ok) {
@@ -150,11 +120,11 @@ const Post: React.FC<IPage> = ({ params }) => {
               comments={comments}
               users={users}
               currentUser={currentUser}
-              deleteComment={deleteComment}
+              deleteComment={handleDeleteComment}
             />
             <form
               method="POST"
-              onSubmit={handleSubmit(createComment)}
+              onSubmit={handleSubmit(handleCreateComment)}
               className="flex flex-col"
             >
               <div className="mb-4">

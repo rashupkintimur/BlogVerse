@@ -17,7 +17,7 @@ const CommentsList: FC<ICommentsList> = ({
   return (
     <ul className="mb-5 grid gap-4">
       {comments.map((comment, index) => {
-        const user = users.find((user) => user._id === comment.user_id);
+        const user = users.find((user) => user._id === comment.userId);
 
         return (
           <li key={index} className="flex items-center justify-between">
@@ -25,7 +25,7 @@ const CommentsList: FC<ICommentsList> = ({
               <h5 className="font-bold">{user?.name || "Unknown"}</h5>
               <p className="pl-3">{comment.text}</p>
             </div>
-            {currentUser?._id === comment.user_id ? (
+            {currentUser?._id === comment.userId ? (
               <button
                 onClick={() => deleteComment(comment._id)}
                 className="bg-red-500 relative z-10 text-white rounded px-5 py-2 ml-4"

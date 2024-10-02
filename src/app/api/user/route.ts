@@ -1,29 +1,20 @@
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
-import { verifyToken } from "@/lib/auth";
 import { db } from "@/lib/mongodb";
+import { cookies } from "next/headers";
 
 export async function PUT(request: Request) {
   try {
     const { name, email } = await request.json();
 
-    const token = request.headers.get("Authorization")?.split(" ")[1];
+    // получаем userId из cookie
+    const cookieStore = cookies();
+    const userId = cookieStore.get("userId")?.value;
 
-    if (!token) {
-      return NextResponse.json(
-        { message: "No token provided" },
-        { status: 401 }
-      );
-    }
-
-    const decoded = verifyToken(token);
-    if (!decoded || typeof decoded.userId !== "string") {
-      return NextResponse.json({ message: "Invalid token" }, { status: 401 });
-    }
-
-    // Преобразование ID в ObjectId
-    const userId = new ObjectId(decoded.userId);
-    const user = await db.collection("users").findOne({ _id: userId });
+    // получаем текущего пользоватля
+    const user = await db
+      .collection("users")
+      .findOne({ _id: new ObjectId(userId) });
 
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
@@ -31,7 +22,7 @@ export async function PUT(request: Request) {
 
     // обновляем данные пользователя
     await db.collection("users").updateOne(
-      { _id: userId },
+      { _id: new ObjectId(userId) },
       {
         $set: {
           name,
@@ -52,25 +43,16 @@ export async function PUT(request: Request) {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const token = request.headers.get("Authorization")?.split(" ")[1];
+    // получаем userId из cookie
+    const cookieStore = cookies();
+    const userId = cookieStore.get("userId")?.value;
 
-    if (!token) {
-      return NextResponse.json(
-        { message: "No token provided" },
-        { status: 401 }
-      );
-    }
-
-    const decoded = verifyToken(token);
-    if (!decoded || typeof decoded.userId !== "string") {
-      return NextResponse.json({ message: "Invalid token" }, { status: 401 });
-    }
-
-    // Преобразование ID в ObjectId
-    const userId = new ObjectId(decoded.userId);
-    const user = await db.collection("users").findOne({ _id: userId });
+    // получаем текущего пользователя
+    const user = await db
+      .collection("users")
+      .findOne({ _id: new ObjectId(userId) });
 
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });

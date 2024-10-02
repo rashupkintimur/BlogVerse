@@ -9,6 +9,7 @@ export async function DELETE(
   const { comment_id } = params;
 
   try {
+    // удаляем пост
     await db
       .collection("comments")
       .deleteOne({ _id: new ObjectId(comment_id) });
@@ -20,7 +21,6 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
       {
         message: "Internal Server Error",

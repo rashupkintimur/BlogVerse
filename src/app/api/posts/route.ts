@@ -1,36 +1,27 @@
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
-import { verifyToken } from "@/lib/auth";
 import { db } from "@/lib/mongodb";
+import { cookies } from "next/headers";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const token = request.headers.get("Authorization")?.split(" ")[1];
+    // получаем userId из cookie
+    const cookieStore = cookies();
+    const userId = cookieStore.get("userId")?.value;
 
-    if (!token) {
-      return NextResponse.json(
-        { message: "No token provided" },
-        { status: 401 }
-      );
-    }
-
-    const decoded = verifyToken(token);
-    if (!decoded || typeof decoded.userId !== "string") {
-      return NextResponse.json({ message: "Invalid token" }, { status: 401 });
-    }
-
-    // Преобразование ID в ObjectId
-    const userId = new ObjectId(decoded.userId);
-    const user = await db.collection("users").findOne({ _id: userId });
-
+    // получаем текущего пользователя
+    const user = await db
+      .collection("users")
+      .findOne({ _id: new ObjectId(userId) });
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
+    // получаем все посты, кроме постов текущего пользователя
     const posts = await db
       .collection("posts")
       .find({
-        user_id: { $ne: userId },
+        userId: { $ne: new ObjectId(userId) },
       })
       .toArray();
 
@@ -49,23 +40,22 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const token = request.headers.get("Authorization")?.split(" ")[1];
+    // получаем userId из cookie
+    const cookieStore = cookies();
+    const userId = cookieStore.get("userId")?.value;
 
-    if (!token) {
+    // если userId нет, значит и токен тоже отсутствует
+    if (!userId) {
       return NextResponse.json(
         { message: "No token provided" },
         { status: 401 }
       );
     }
 
-    const decoded = verifyToken(token);
-    if (!decoded || typeof decoded.userId !== "string") {
-      return NextResponse.json({ message: "Invalid token" }, { status: 401 });
-    }
-
-    // Преобразование ID в ObjectId
-    const userId = new ObjectId(decoded.userId);
-    const user = await db.collection("users").findOne({ _id: userId });
+    // получаем текущего пользователя
+    const user = await db
+      .collection("users")
+      .findOne({ _id: new ObjectId(userId) });
 
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
@@ -76,8 +66,8 @@ export async function POST(request: Request) {
     const currentData = new Date();
 
     // создаём новый пост
-    db.collection("posts").insertOne({
-      user_id: user._id,
+    const newPost = await db.collection("posts").insertOne({
+      userId: user._id,
       title,
       description,
       text,
@@ -85,7 +75,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({
-      _id: user._id,
+      _id: newPost.insertedId,
       title,
       description,
       text,

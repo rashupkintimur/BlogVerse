@@ -50,27 +50,11 @@ export default function Profile() {
 
   useEffect(() => {
     (async () => {
-      const token = localStorage.getItem("token");
-
       // Загрузка данных постов
-      const postsRes = await fetch("/api/myposts", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const postsRes = await fetch("/api/myposts");
 
       // Загрузка данных пользователя
-      const userRes = await fetch("/api/user", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      // проверка действительности токена
-      if (userRes.status === 401) {
-        router.push("/login");
-        return;
-      }
+      const userRes = await fetch("/api/user");
 
       if (userRes.ok && postsRes.ok) {
         const userData = await userRes.json();
@@ -85,13 +69,10 @@ export default function Profile() {
 
   // обработчик создания поста
   const handleCreatePost = async (data: IPostForm) => {
-    const token = localStorage.getItem("token");
-
     const res = await fetch("/api/posts", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         title: data.title,
@@ -99,12 +80,6 @@ export default function Profile() {
         text: data.text,
       }),
     });
-
-    // проверка действительности токена
-    if (res.status === 401) {
-      router.push("/login");
-      return;
-    }
 
     if (res.ok) {
       const resData = await res.json();
@@ -117,27 +92,18 @@ export default function Profile() {
 
   // обработчик изменения данных пользователя
   const handleUpdateProfile = async (data: IUserProfile) => {
-    const token = localStorage.getItem("token");
-
     setUserProfile(null);
 
     const res = await fetch("/api/user", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         name: data.name,
         email: data.email,
       }),
     });
-
-    // проверка действительности токена
-    if (res.status === 401) {
-      router.push("/login");
-      return;
-    }
 
     if (res.ok) {
       const resData = await res.json();
@@ -150,21 +116,9 @@ export default function Profile() {
 
   // обработчик удаления поста
   const handleDeletePost = async (id: string) => {
-    const token = localStorage.getItem("token");
-
     const res = await fetch(`/api/posts/${id}`, {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
     });
-
-    // проверка действительности токена
-    if (res.status === 401) {
-      router.push("/login");
-      return;
-    }
 
     if (res.ok) {
       setPosts(posts.filter((post) => String(post._id) !== id));

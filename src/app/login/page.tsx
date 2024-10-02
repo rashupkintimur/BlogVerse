@@ -21,8 +21,9 @@ export default function Login() {
   const [responseMessage, setResponseMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit = async (data: IFormData) => {
+  const handleLogin = async (data: IFormData) => {
     setIsLoading(true);
+    // авторизация
     const res = await fetch("/api/login", {
       method: "POST",
       headers: {
@@ -34,8 +35,6 @@ export default function Login() {
     const result = await res.json();
 
     if (res.ok) {
-      // Сохранение токена в localStorage
-      localStorage.setItem("token", result.token);
       router.push("/posts");
     } else {
       setIsLoading(false);
@@ -49,7 +48,7 @@ export default function Login() {
         <h1 className="text-2xl font-bold text-center text-gray-900">
           Enter an account
         </h1>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(handleLogin)} className="space-y-4">
           <div>
             <label
               htmlFor="email"

@@ -1,11 +1,16 @@
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { JWTPayload, jwtVerify } from "jose";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
-export function verifyToken(token: string): JwtPayload | null {
+export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
-    return jwt.verify(token, JWT_SECRET) as { id: string };
+    const { payload } = await jwtVerify(
+      token,
+      new TextEncoder().encode(JWT_SECRET)
+    );
+    return payload as JWTPayload;
   } catch (err) {
+    console.error("Token verification error:", err);
     return null;
   }
 }

@@ -1,6 +1,6 @@
-import { verifyToken } from "@/lib/auth";
 import { db } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function POST(
@@ -10,23 +10,14 @@ export async function POST(
   const { id: postId } = params;
 
   try {
-    const token = request.headers.get("Authorization")?.split(" ")[1];
+    // получаем userId из cookie
+    const cookieStore = cookies();
+    const userId = cookieStore.get("userId")?.value;
 
-    if (!token) {
-      return NextResponse.json(
-        { message: "No token provided" },
-        { status: 401 }
-      );
-    }
-
-    const decoded = verifyToken(token);
-    if (!decoded || typeof decoded.userId !== "string") {
-      return NextResponse.json({ message: "Invalid token" }, { status: 401 });
-    }
-
-    // Преобразование ID в ObjectId
-    const userId = new ObjectId(decoded.userId);
-    const user = await db.collection("users").findOne({ _id: userId });
+    // получаем текущего пользователя
+    const user = await db
+      .collection("users")
+      .findOne({ _id: new ObjectId(userId) });
 
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
@@ -34,9 +25,10 @@ export async function POST(
 
     const { text } = await request.json();
 
+    // создаем комментарий к посту
     await db.collection("comments").insertOne({
-      user_id: new ObjectId(userId),
-      post_id: new ObjectId(postId),
+      userId: new ObjectId(userId),
+      postId: new ObjectId(postId),
       text,
     });
 
@@ -66,11 +58,11 @@ export async function GET(
     // Получаем комментарии поста
     const comments = await db
       .collection("comments")
-      .find({ post_id: new ObjectId(id) })
+      .find({ postId: new ObjectId(id) })
       .toArray();
 
     // Извлекаем все user_id из комментариев
-    const userIds = comments.map((comment) => new ObjectId(comment.user_id));
+    const userIds = comments.map((comment) => new ObjectId(comment.userId));
 
     // Получаем имена пользователей по их user_id
     const users = await db

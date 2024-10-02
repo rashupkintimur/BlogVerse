@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { db } from "@/lib/mongodb";
+import { serialize } from "cookie";
 
 export async function POST(request: Request) {
   try {
@@ -32,7 +33,22 @@ export async function POST(request: Request) {
       { expiresIn: "1h" } // Токен истекает через 1 час
     );
 
-    return NextResponse.json({ token });
+    // Сериализуем cookie с помощью метода serialize
+    const cookie = serialize("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== "development",
+      maxAge: 60 * 60,
+      sameSite: "strict",
+      path: "/",
+    });
+
+    // Создаём ответ
+    const response = NextResponse.json({ success: true });
+
+    // Добавляем заголовок Set-Cookie в ответ
+    response.headers.set("Set-Cookie", cookie);
+
+    return response;
   } catch (err) {
     return NextResponse.json(
       { message: "Authorization failed" },
