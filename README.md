@@ -16,8 +16,6 @@
 
 ### Требования
 
-- Node.js >= 14.x
-- npm или yarn
 - docker
 
 ### Клонирование репозитория
@@ -25,8 +23,8 @@
 Сначала клонируйте репозиторий:
 
 ```bash
-git clone https://github.com/yourusername/blogverse.git
-cd blogverse
+git clone https://github.com/rashupkintimur/BlogVerse.git
+cd BlogVerse
 ```
 
 Запустите docker контейнер:
